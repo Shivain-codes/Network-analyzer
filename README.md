@@ -6,12 +6,12 @@ A real-time social network analyzer that applies **Discrete Mathematics** concep
 
 ---
 
-## 🔴 Live Demo
+##  Live Demo
 **[socialsphere.vercel.app](https://socialsphere.vercel.app)**
 
 ---
 
-## ✨ Features
+##  Features
 
 ### 📡 Live Platforms
 | Platform | Data Source | Type |
@@ -20,7 +20,7 @@ A real-time social network analyzer that applies **Discrete Mathematics** concep
 | **YouTube** | Channel & related creator network | 🟢 Live API |
 | **Instagram** | Posts, hashtags, mentions, audience | 🟢 Live API |
 
-### 🧮 Discrete Mathematics Algorithms
+###  Discrete Mathematics Algorithms
 | Algorithm | Applied To |
 |---|---|
 | **Graph Theory** G=(V,E) | All network visualizations |
@@ -41,7 +41,7 @@ A real-time social network analyzer that applies **Discrete Mathematics** concep
 
 ---
 
-## 🚀 Deploy Your Own
+##  Deploy Your Own
 
 ### 1. Fork this repo
 
@@ -63,7 +63,7 @@ Vercel auto-redeploys after adding env vars. Your keys are **never** in the code
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 socialsphere/
@@ -77,12 +77,12 @@ socialsphere/
 
 ---
 
-## 🛡️ Security
+##  Security
 
-- ✅ API keys stored in **Vercel Environment Variables** — never in code
-- ✅ `/api/config` serverless function delivers keys at runtime
-- ✅ No keys exposed in GitHub repository
-- ✅ `.gitignore` prevents accidental `.env` commits
+-  API keys stored in **Vercel Environment Variables** — never in code
+-  `/api/config` serverless function delivers keys at runtime
+-  No keys exposed in GitHub repository
+-  `.gitignore` prevents accidental `.env` commits
 
 ---
 
