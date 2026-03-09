@@ -31,13 +31,7 @@ A real-time social network analyzer that applies **Discrete Mathematics** concep
 | **Clustering Coefficient** | Local network density |
 | **Set Theory** A∩B | Mutual connections |
 
-### 📊 Instagram Features
-- My Network — posts + hashtag nodes + commenter nodes
-- `#Hashtag` Search — any public hashtag as live graph
-- Comment Network — real commenter usernames as nodes  
-- `@Mentions` — posts where your account was tagged
-- Audience Demographics — age, gender, cities, countries
-- Follower Growth — 30-day animated timeline chart
+
 
 ---
 
