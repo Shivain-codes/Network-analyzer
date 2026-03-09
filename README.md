@@ -16,9 +16,9 @@ A real-time social network analyzer that applies **Discrete Mathematics** concep
 ### 📡 Live Platforms
 | Platform | Data Source | Type |
 |---|---|---|
-| **GitHub** | Real follower/following network | 🟢 Live API |
-| **YouTube** | Channel & related creator network | 🟢 Live API |
-| **Instagram** | Posts, hashtags, mentions, audience | 🟢 Live API |
+| **GitHub** | Real follower/following network |  Live API |
+| **YouTube** | Channel & related creator network |  Live API |
+| **Instagram** | Posts, hashtags, mentions, audience |  Live API |
 
 ###  Discrete Mathematics Algorithms
 | Algorithm | Applied To |
@@ -86,21 +86,11 @@ socialsphere/
 
 ---
 
-## 👨‍💻 Team
 
-| Name | Role |
-|---|---|
-| **Shivain Gupta** | Lead Developer |
-| **Harnoor Singh** | Algorithm Implementation |
-| **Lakshaya Goyat** | UI/UX & Visualization |
-
-**Professor:** Dr. Palak Goel  
-**Subject:** Discrete Mathematics  
-**University:** BML Munjal University · CSE Section 1
 
 ---
 
-## 📚 DM Concepts Reference
+##  DM Concepts Reference
 
 ```
 Graph G = (V, E)
