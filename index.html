@@ -469,24 +469,8 @@ select:focus { border-color:var(--orange); }
 <div class="toast"   id="toast"></div>
 
 <script>
-// ================================================================
-//  SOCIALSPHERE v3 — COMPLETE MULTI-PLATFORM ENGINE
-//
-//  ┌─────────────────────────────────────────────────────┐
-//  │  PASTE YOUR CREDENTIALS IN THE SECTION BELOW        │
-//  │  Your data stays LOCAL — never stored anywhere      │
-//  └─────────────────────────────────────────────────────┘
-//
-//  BML Munjal University — Discrete Mathematics Project
-//  Shivain Gupta · Harnoor Singh · Lakshaya Goyat · CSE Sec 1
-//  Professor: Dr. Palak Goel
-// ================================================================
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║         CREDENTIALS — Loaded from Vercel /api/config        ║
-// ║   Set keys in: Vercel Dashboard → Settings → Env Variables  ║
-// ║   GITHUB_TOKEN · YOUTUBE_KEY · INSTAGRAM_TOKEN · USER_ID    ║
-// ╚══════════════════════════════════════════════════════════════╝
+
 
 const CREDENTIALS = {
   GITHUB_TOKEN:      '',
@@ -495,8 +479,7 @@ const CREDENTIALS = {
   INSTAGRAM_USER_ID: '',
 };
 
-// Fetches real API keys securely from Vercel serverless function
-// Keys never appear in source code or GitHub — 100% secure
+
 async function loadCredentials() {
   try {
     const res  = await fetch('/api/config');
@@ -676,9 +659,6 @@ function saveIGCreds() {
   if(u) CREDENTIALS.INSTAGRAM_USER_ID = u;
 }
 
-// ================================================================
-//  PLATFORM SWITCH
-// ================================================================
 function switchPlatform(p) {
   platform = p;
   ['github','youtube','instagram'].forEach(id => {
@@ -707,9 +687,7 @@ function loadPick(name) {
   fetchNetwork();
 }
 
-// ================================================================
-//  MAIN FETCH ROUTER
-// ================================================================
+
 async function fetchNetwork() {
   const q = document.getElementById('search-input').value.trim();
   if(!q && platform !== 'instagram') return showToast('Please enter a username');
@@ -718,9 +696,7 @@ async function fetchNetwork() {
   else await fetchInstagram();
 }
 
-// ================================================================
-//  GITHUB — LIVE API
-// ================================================================
+
 async function fetchGitHub(username) {
   if(!CREDENTIALS.GITHUB_TOKEN) {
     showToast('⚠️ Please paste your GitHub token in the CREDENTIALS section at top of the code');
@@ -776,10 +752,7 @@ async function fetchGitHub(username) {
   }
 }
 
-// ================================================================
-//  YOUTUBE — 100% LIVE & DYNAMIC (Real YouTube Data API v3)
-//  Search ANY channel by name — fully real data, nothing hardcoded
-// ================================================================
+
 async function loadYouTube(query) {
   if(!query) return showToast('Please enter a YouTube channel name');
 
@@ -842,8 +815,7 @@ async function loadYouTube(query) {
       role: 'center', platform: 'youtube', group: 0
     };
 
-    // ── Step 3: Search related channels (same topic/genre) ──
-    // We search for similar channels using the channel title as query
+    
     const relatedNames = [
       chan.snippet.title + ' similar',
       (chan.snippet.keywords || chan.snippet.description || query).split(/\s+/).slice(0,3).join(' '),
@@ -1123,9 +1095,7 @@ function renderGraph() {
   updateColors();
 }
 
-// ================================================================
-//  VISUAL HELPERS
-// ================================================================
+
 function getPlatformColor(){
   if(platform==='github') return '#6a9bcc';
   if(platform==='youtube') return '#d97757';
@@ -1185,9 +1155,7 @@ function updateColors(){
     });
 }
 
-// ================================================================
-//  DM ALGORITHMS
-// ================================================================
+
 function computeMetrics(nodes, links){
   const adj={};
   nodes.forEach(n=>adj[n.id]=new Set());
@@ -1273,9 +1241,7 @@ function bfs(src,dst){
   return null;
 }
 
-// ================================================================
-//  ALGORITHM ANIMATION PANEL
-// ================================================================
+
 function showAlgoPanel(title, steps){
   const panel=document.getElementById('algo-panel');
   document.getElementById('algo-title').textContent=title;
@@ -1390,9 +1356,7 @@ function restoreNetwork(){
   renderGraph();
 }
 
-// ================================================================
-//  NODE SELECTION
-// ================================================================
+
 function selectNode(d){
   const id=d.id, m=metrics[id];
   if(!m)return;
@@ -1419,9 +1383,7 @@ function selectNodeById(id){
   if(n)selectNode(n);
 }
 
-// ================================================================
-//  RIGHT PANEL
-// ================================================================
+
 function updateRightPanel(nodes,links){
   document.getElementById('s-nodes').textContent=nodes.length;
   document.getElementById('s-edges').textContent=links.length;
@@ -1465,9 +1427,7 @@ function updateRightPanel(nodes,links){
   if(nodes.length>1)document.getElementById('path-to').selectedIndex=1;
 }
 
-// ================================================================
-//  LIVE BADGE / LOADING / TOAST
-// ================================================================
+
 function setLiveBadge(isLive,text,color){
   const b=document.getElementById('live-badge');
   document.getElementById('live-dot').style.background=color||'#788c5d';
@@ -1515,9 +1475,7 @@ function clearGraph(){
   ['s-nodes','s-edges','s-density','s-clusters'].forEach(id=>document.getElementById(id).textContent='—');
 }
 
-// ================================================================
-//  TOOLTIP / ZOOM / SIM
-// ================================================================
+
 function showTip(event,d){
   const m=metrics[d.id]||{};
   const extra = d.subscribers
@@ -1552,9 +1510,7 @@ function fmtNum(n){
   return String(n);
 }
 
-// ================================================================
-//  INSTAGRAM MODE TABS
-// ================================================================
+
 let igMode = 'profile';
 function renderAudienceDashboard(profile, genderAge, cityData, countryData, ageGroups, genders) {
   document.getElementById('ig-dashboard')?.remove();
@@ -1661,9 +1617,7 @@ function renderAudienceDashboard(profile, genderAge, cityData, countryData, ageG
   document.querySelector('.gcenter').appendChild(dash);
 }
 
-// ================================================================
-//  FOLLOWER GROWTH TIMELINE — 30-day animated chart
-// ================================================================
+
 function renderGrowthDashboard(profile, values) {
   document.getElementById('ig-dashboard')?.remove();
   if(!values.length) return showToast('No growth data available for your account');
@@ -1763,9 +1717,7 @@ function renderGrowthDashboard(profile, values) {
   document.querySelector('.gcenter').appendChild(dash);
 }
 
-// ================================================================
-//  PARTICLE BACKGROUND — Ambient floating nodes
-// ================================================================
+
 let particles=[], pCanvas, pCtx, pAnim;
 function initParticles() {
   pCanvas = document.getElementById('particle-canvas');
@@ -1810,9 +1762,7 @@ function animateParticles(){
   pAnim=requestAnimationFrame(animateParticles);
 }
 
-// ================================================================
-//  AUTO DEMO MODE — Self-presenting walkthrough
-// ================================================================
+
 let demoRunning=false, demoTimeout=null;
 function startAutoDemo(){
   if(!graphData){showToast('Load a network first, then start Auto Demo');return;}
@@ -1855,9 +1805,7 @@ function stopAutoDemo(){
   document.getElementById('demo-badge').classList.remove('show');
 }
 
-// ================================================================
-//  NETWORK COMPARISON
-// ================================================================
+
 let compareMode=false, compareSnap=null;
 function toggleCompare(){
   compareMode=!compareMode;
@@ -1902,9 +1850,7 @@ function updateCompareB(){
   document.getElementById('cmp-b-den').textContent=den;
 }
 
-// ================================================================
-//  WOW LIVE COUNTERS — Animated counting
-// ================================================================
+
 function showWowCounters(nodes, links, metricsData){
   const counter=document.getElementById('wow-counter');
   counter.style.display='flex';
@@ -1928,9 +1874,7 @@ function animateCount(id, target){
   },40);
 }
 
-// ================================================================
-//  INIT — Add particles + update compare on render
-// ================================================================
+
 window.onload = async () => {
   await loadCredentials(); // ← fetches keys from Vercel /api/config
   renderPicks();
