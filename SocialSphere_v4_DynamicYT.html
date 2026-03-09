@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SocialSphere — Multi-Platform Network Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#141413; --s1:#1a1917; --s2:#201f1c; --s3:#282622;
+  --border:#2e2c28; --border2:#3a3834;
+  --text:#faf9f5; --text2:#c8c4bc; --muted:#7a7670; --dim:#4a4845;
+  --orange:#d97757; --orange2:#e8956d; --orange-dim:#3d2218;
+  --blue:#6a9bcc; --blue-dim:#1a2d3d;
+  --green:#788c5d; --green-dim:#1e2818;
+  --purple:#bc8cff; --purple-dim:#2a1a3d;
+  --pink:#e1306c; --pink-dim:#3d1020;
+  --cream:#faf9f5;
+  --shadow:0 4px 24px rgba(0,0,0,0.5);
+  --glow-o:0 0 20px rgba(217,119,87,0.3);
+  --glow-b:0 0 20px rgba(106,155,204,0.3);
+  --glow-p:0 0 20px rgba(225,48,108,0.3);
+}
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; height:100vh; overflow:hidden; }
+
+/* ── HEADER ── */
+header { height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; border-bottom:1px solid var(--border); background:var(--bg); z-index:100; position:relative; }
+.logo { display:flex; align-items:center; gap:12px; }
+.logo-mark { width:30px; height:30px; background:var(--orange); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:15px; box-shadow:var(--glow-o); }
+.logo-name { font-family:'Playfair Display',serif; font-size:19px; font-weight:700; }
+.logo-name span { color:var(--orange); }
+.logo-sub { font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-top:1px; }
+.header-center { display:flex; align-items:center; gap:6px; }
+.ptab { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+.ptab:hover { border-color:var(--border2); color:var(--text2); }
+.ptab.ag { background:var(--blue-dim); border-color:var(--blue); color:var(--blue); box-shadow:var(--glow-b); }
+.ptab.ay { background:var(--orange-dim); border-color:var(--orange); color:var(--orange); box-shadow:var(--glow-o); }
+.ptab.ai { background:var(--pink-dim); border-color:var(--pink); color:var(--pink); box-shadow:var(--glow-p); }
+.header-right { font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); text-align:right; line-height:1.6; }
+
+/* ── LAYOUT ── */
+.app { display:grid; grid-template-columns:272px 1fr 260px; height:calc(100vh - 56px); }
+
+/* ── PANELS ── */
+.panel { background:var(--s1); overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column; }
+.panel.left { border-right:1px solid var(--border); }
+.panel.right { border-left:1px solid var(--border); }
+.psec { padding:16px 18px; border-bottom:1px solid var(--border); }
+.slabel { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--dim); text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.slabel::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── SEARCH ── */
+.sw { position:relative; }
+.si { width:100%; padding:10px 40px 10px 13px; background:var(--s2); border:1px solid var(--border); border-radius:7px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px; outline:none; transition:all 0.2s; }
+.si::placeholder { color:var(--dim); }
+.si:focus { border-color:var(--orange); background:var(--s3); }
+.sb { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; transition:color 0.2s; }
+.sb:hover { color:var(--orange); }
+.qpicks { display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
+.chip { padding:3px 9px; border-radius:20px; border:1px solid var(--border); background:var(--s2); color:var(--text2); font-size:10px; font-family:'Space Mono',monospace; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+.chip:hover { border-color:var(--orange); color:var(--orange); background:var(--orange-dim); }
+
+/* ── STATS ── */
+.sgrid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.sbox { background:var(--s2); border:1px solid var(--border); border-radius:7px; padding:11px 13px; }
+.sval { font-family:'Playfair Display',serif; font-size:26px; font-weight:700; line-height:1; margin-bottom:2px; }
+.skey { font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; }
+
+/* ── BUTTONS ── */
+.abtn { width:100%; padding:9px 13px; border-radius:7px; border:1px solid var(--border); background:var(--s2); color:var(--text2); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; text-align:left; display:flex; align-items:center; gap:9px; margin-bottom:5px; }
+.abtn:last-child { margin-bottom:0; }
+.abtn:hover { border-color:var(--border2); color:var(--text); background:var(--s3); }
+.abtn.active { border-color:var(--orange); color:var(--orange); background:var(--orange-dim); }
+.abtn-ico { font-size:14px; flex-shrink:0; }
+.abtn-dm { margin-left:auto; font-family:'Space Mono',monospace; font-size:9px; color:var(--dim); }
+
+/* ── SELECT ── */
+select { width:100%; padding:8px 11px; background:var(--s2); border:1px solid var(--border); border-radius:7px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; outline:none; margin-bottom:7px; }
+select:focus { border-color:var(--orange); }
+
+/* ── PATH ── */
+.pbox { display:none; margin-top:9px; padding:11px; background:var(--s2); border:1px solid var(--border); border-radius:7px; }
+.pbox.show { display:block; }
+.pchain { display:flex; flex-wrap:wrap; align-items:center; gap:3px; margin-top:7px; }
+.pchip { padding:2px 7px; border-radius:4px; background:var(--orange-dim); border:1px solid rgba(217,119,87,0.3); color:var(--orange); font-size:10px; font-family:'Space Mono',monospace; }
+.parr { color:var(--dim); font-size:11px; }
+
+/* ── GRAPH ── */
+.gcenter { position:relative; background:var(--bg); overflow:hidden; }
+#graph-svg { width:100%; height:100%; }
+.ftbar { position:absolute; top:14px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:3px; background:rgba(20,20,19,0.93); border:1px solid var(--border); border-radius:30px; padding:4px 9px; backdrop-filter:blur(16px); z-index:10; }
+.ftbtn { padding:4px 12px; border-radius:20px; border:1px solid transparent; background:transparent; color:var(--muted); font-family:'Space Mono',monospace; font-size:10px; cursor:pointer; transition:all 0.2s; }
+.ftbtn:hover { color:var(--text2); border-color:var(--border); }
+.ftsep { width:1px; height:14px; background:var(--border); margin:0 2px; }
+
+/* ── LOADING ── */
+.loverlay { position:absolute; inset:0; background:rgba(20,20,19,0.93); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:50; backdrop-filter:blur(8px); }
+.loverlay.hidden { display:none; }
+.lring { width:44px; height:44px; border:2px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:14px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.ltxt { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+.lsub { font-size:11px; color:var(--dim); margin-top:5px; }
+.llog { margin-top:14px; font-family:'Space Mono',monospace; font-size:10px; color:var(--dim); text-align:center; max-width:300px; line-height:1.8; }
+
+/* ── EMPTY ── */
+.estate { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; }
+.estate.hidden { display:none; }
+.eico { font-size:52px; margin-bottom:18px; opacity:0.15; }
+.etitle { font-family:'Playfair Display',serif; font-size:21px; color:var(--muted); margin-bottom:7px; }
+.esub { font-size:12px; color:var(--dim); text-align:center; max-width:280px; line-height:1.7; }
+
+/* ── LEGEND ── */
+.glegend { position:absolute; bottom:14px; left:14px; background:rgba(20,20,19,0.91); border:1px solid var(--border); border-radius:8px; padding:11px 13px; backdrop-filter:blur(8px); z-index:10; }
+.lrow { display:flex; align-items:center; gap:7px; margin-bottom:4px; font-size:10px; color:var(--muted); font-family:'Space Mono',monospace; }
+.lrow:last-child { margin-bottom:0; }
+.ldot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+/* ── LIVE BADGE ── */
+.livebadge { position:absolute; top:14px; right:14px; display:flex; align-items:center; gap:5px; padding:4px 11px; background:rgba(20,20,19,0.91); border:1px solid var(--border); border-radius:20px; font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); z-index:10; backdrop-filter:blur(8px); }
+.livedot { width:6px; height:6px; border-radius:50%; animation:pulse 1.5s infinite; flex-shrink:0; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }
+
+/* ── ALGORITHM PANEL ── */
+.algo-panel { position:absolute; bottom:14px; right:14px; width:240px; background:rgba(20,20,19,0.95); border:1px solid var(--border); border-radius:10px; padding:13px; backdrop-filter:blur(12px); z-index:20; display:none; }
+.algo-panel.show { display:block; }
+.algo-title { font-family:'Space Mono',monospace; font-size:10px; color:var(--orange); letter-spacing:1px; margin-bottom:10px; text-transform:uppercase; }
+.algo-step { font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:5px; padding:5px 8px; background:var(--s2); border-radius:5px; border-left:2px solid var(--border); transition:all 0.3s; line-height:1.5; }
+.algo-step.active { color:var(--orange); border-left-color:var(--orange); background:var(--orange-dim); }
+.algo-step.done { color:var(--green); border-left-color:var(--green); }
+.algo-progress { margin-top:8px; height:2px; background:var(--border); border-radius:1px; }
+.algo-bar { height:100%; background:var(--orange); border-radius:1px; width:0%; transition:width 0.4s ease; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(80px); padding:11px 20px; border-radius:8px; border:1px solid; font-size:13px; font-family:'DM Sans',sans-serif; z-index:9999; transition:transform 0.3s ease; max-width:440px; text-align:center; pointer-events:none; }
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ── RIGHT PANEL ── */
+.iitem { display:flex; align-items:center; gap:9px; padding:8px 9px; border-radius:7px; background:var(--s2); border:1px solid var(--border); margin-bottom:5px; cursor:pointer; transition:all 0.2s; }
+.iitem:hover { border-color:var(--border2); background:var(--s3); }
+.iitem:last-child { margin-bottom:0; }
+.irank { font-family:'Space Mono',monospace; font-size:9px; color:var(--dim); width:16px; text-align:center; flex-shrink:0; }
+.iavatar { width:30px; height:30px; border-radius:50%; overflow:hidden; flex-shrink:0; background:var(--s3); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; border:1px solid var(--border); }
+.iavatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.iinfo { flex:1; min-width:0; }
+.iname { font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.imeta { font-size:10px; color:var(--muted); font-family:'Space Mono',monospace; margin-top:1px; }
+.ibar { height:2px; background:var(--border); border-radius:1px; margin-top:3px; }
+.ibarfill { height:100%; border-radius:1px; transition:width 0.6s ease; }
+
+/* ── NODE DETAIL ── */
+.ndetail { background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:13px; }
+.ndhead { display:flex; align-items:center; gap:9px; margin-bottom:11px; }
+.ndav { width:38px; height:38px; border-radius:50%; background:var(--s3); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; border:2px solid var(--border); overflow:hidden; flex-shrink:0; }
+.ndav img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.ndname { font-family:'Playfair Display',serif; font-size:14px; font-weight:700; line-height:1.2; }
+.ndplat { font-size:10px; color:var(--muted); font-family:'Space Mono',monospace; margin-top:2px; }
+.ndmetrics { display:flex; flex-direction:column; gap:7px; }
+.ndm { display:flex; justify-content:space-between; align-items:center; }
+.ndmk { font-size:11px; color:var(--muted); }
+.ndmv { font-family:'Space Mono',monospace; font-size:10px; font-weight:700; }
+
+/* ── DM CONCEPTS ── */
+.dmc { padding:9px 11px; background:var(--s2); border:1px solid var(--border); border-radius:7px; margin-bottom:5px; }
+.dmc:last-child { margin-bottom:0; }
+.dmct { font-size:11px; font-weight:600; margin-bottom:2px; }
+.dmcd { font-size:10px; color:var(--muted); font-family:'Space Mono',monospace; line-height:1.5; }
+
+/* ── COMMUNITY ── */
+.citem { display:flex; align-items:center; gap:9px; padding:7px 9px; background:var(--s2); border:1px solid var(--border); border-radius:7px; margin-bottom:5px; }
+.cdot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+/* ── FOOTER ── */
+.footstrip { position:absolute; bottom:14px; right:14px; font-family:'Space Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:0.5px; text-align:right; z-index:10; line-height:1.8; }
+
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.tooltip { position:fixed; background:rgba(20,20,19,0.97); border:1px solid var(--border); border-radius:8px; padding:9px 13px; font-size:11px; pointer-events:none; z-index:1000; display:none; max-width:200px; box-shadow:var(--shadow); line-height:1.7; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">⬡</div>
+    <div>
+      <div class="logo-name">Social<span>Sphere</span></div>
+      <div class="logo-sub">Multi-Platform Network Intelligence</div>
+    </div>
+  </div>
+  <div class="header-center">
+    <button class="ptab ag" id="tab-github"    onclick="switchPlatform('github')">⬡ GitHub</button>
+    <button class="ptab"    id="tab-youtube"   onclick="switchPlatform('youtube')">▶ YouTube</button>
+    <button class="ptab"    id="tab-instagram" onclick="switchPlatform('instagram')">◎ Instagram</button>
+  </div>
+  <div class="header-right">
+    BML Munjal University · Discrete Maths<br>
+    Dr. Palak Goel · CSE Section 1
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- LEFT PANEL -->
+  <div class="panel left">
+    <div class="psec">
+      <div class="slabel">Search Network</div>
+      <div class="sw">
+        <input class="si" id="search-input" placeholder="Enter GitHub username..." onkeydown="if(event.key==='Enter')fetchNetwork()"/>
+        <button class="sb" onclick="fetchNetwork()">→</button>
+      </div>
+      <div class="qpicks" id="quick-picks"></div>
+    </div>
+
+    <div class="psec">
+      <div class="slabel">Network Stats</div>
+      <div class="sgrid">
+        <div class="sbox"><div class="sval" id="s-nodes" style="color:var(--orange)">—</div><div class="skey">Nodes</div></div>
+        <div class="sbox"><div class="sval" id="s-edges" style="color:var(--blue)">—</div><div class="skey">Edges</div></div>
+        <div class="sbox"><div class="sval" id="s-density" style="color:var(--green)">—</div><div class="skey">Density</div></div>
+        <div class="sbox"><div class="sval" id="s-clusters" style="color:var(--text2)">—</div><div class="skey">Clusters</div></div>
+      </div>
+    </div>
+
+    <div class="psec">
+      <div class="slabel">Analysis Mode</div>
+      <button class="abtn active" id="btn-default"    onclick="setMode('default')"><span class="abtn-ico">◉</span>Default View<span class="abtn-dm">Graph Theory</span></button>
+      <button class="abtn"        id="btn-influencer" onclick="setMode('influencer')"><span class="abtn-ico">★</span>Influencers<span class="abtn-dm">Centrality</span></button>
+      <button class="abtn"        id="btn-community"  onclick="setMode('community')"><span class="abtn-ico">◈</span>Communities<span class="abtn-dm">Graph Coloring</span></button>
+      <button class="abtn"        id="btn-path"       onclick="setMode('path')"><span class="abtn-ico">⇢</span>Shortest Path<span class="abtn-dm">BFS</span></button>
+      <button class="abtn"        id="btn-pagerank"   onclick="setMode('pagerank')"><span class="abtn-ico">◎</span>PageRank<span class="abtn-dm">Iterative</span></button>
+      <button class="abtn"        id="btn-break"      onclick="setMode('break')"><span class="abtn-ico">✕</span>Break Network<span class="abtn-dm">Connectivity</span></button>
+    </div>
+
+    <div class="psec" id="path-section" style="display:none;">
+      <div class="slabel">BFS Shortest Path</div>
+      <select id="path-from"></select>
+      <select id="path-to"></select>
+      <button class="abtn active" onclick="computePath()"><span class="abtn-ico">⇢</span>Animate BFS</button>
+      <div class="pbox" id="path-box">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);" id="path-len"></div>
+        <div class="pchain" id="path-chain"></div>
+      </div>
+    </div>
+
+    <div class="psec" id="break-section" style="display:none;">
+      <div class="slabel">Break The Network</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;background:var(--s2);padding:11px;border-radius:7px;border:1px solid var(--border);">
+         Click any <span style="color:var(--orange);font-weight:600;">node</span> to remove it and watch the network fragment live.<br>
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);">DM: Graph Connectivity & Bridge Nodes</span>
+      </div>
+      <button class="abtn" style="margin-top:9px;" onclick="restoreNetwork()"><span class="abtn-ico">↺</span>Restore Network</button>
+    </div>
+
+    <!-- INSTAGRAM CREDENTIALS SECTION -->
+    <div class="psec" id="ig-creds-section" style="display:none;">
+      <div class="slabel">Instagram Credentials</div>
+      <div style="background:var(--pink-dim);border:1px solid rgba(225,48,108,0.3);border-radius:8px;padding:12px;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--pink);font-weight:600;margin-bottom:6px;">📋 Paste Your Credentials Below</div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.6;font-family:'Space Mono',monospace;">Your data stays local — never sent anywhere except Instagram's official API</div>
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:5px;">ACCESS TOKEN</div>
+        <input id="ig-token-input" type="password"
+          style="width:100%;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Space Mono',monospace;font-size:11px;outline:none;"
+          placeholder="Paste your Instagram Access Token here..."
+          oninput="saveIGCreds()"/>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:5px;">USER ID <span style="color:var(--dim)">(numeric, e.g. 17841405822304914)</span></div>
+        <input id="ig-userid-input" type="text"
+          style="width:100%;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Space Mono',monospace;font-size:11px;outline:none;"
+          placeholder="Your Instagram User ID..."
+          oninput="saveIGCreds()"/>
+      </div>
+
+      <button class="abtn active" onclick="fetchInstagram()" style="border-color:var(--pink);color:var(--pink);background:var(--pink-dim);">
+        <span class="abtn-ico">◎</span>Load My Instagram Network
+      </button>
+
+      <div style="margin-top:10px;font-family:'Space Mono',monospace;font-size:9px;color:var(--dim);line-height:1.7;padding:8px;background:var(--s2);border-radius:6px;border:1px solid var(--border);">
+        WHERE TO GET THESE:<br>
+        1. Go to developers.facebook.com<br>
+        2. My Apps → Your App → Tools<br>
+        3. Graph API Explorer<br>
+        4. Generate Access Token<br>
+        5. Copy User ID from profile endpoint
+      </div>
+    </div>
+  </div>
+
+  <!-- GRAPH CENTER -->
+  <div class="gcenter">
+    <svg id="graph-svg"></svg>
+
+    <div class="ftbar">
+      <button class="ftbtn" onclick="zoomIn()">⊕ Zoom</button>
+      <button class="ftbtn" onclick="zoomOut()">⊖ Zoom</button>
+      <div class="ftsep"></div>
+      <button class="ftbtn" onclick="resetView()">⊙ Reset</button>
+      <div class="ftsep"></div>
+      <button class="ftbtn" onclick="toggleSim()" id="sim-btn">⏸ Pause</button>
+    </div>
+
+    <div class="livebadge" id="live-badge" style="display:none;">
+      <div class="livedot" id="live-dot"></div>
+      <span id="live-text">LIVE</span>
+    </div>
+
+    <div class="loverlay hidden" id="loading">
+      <div class="lring"></div>
+      <div class="ltxt" id="ltxt">FETCHING NETWORK</div>
+      <div class="lsub" id="lsub">Please wait...</div>
+      <div class="llog" id="llog"></div>
+    </div>
+
+    <div class="estate" id="empty-state">
+      <div class="eico">⬡</div>
+      <div class="etitle">No Network Loaded</div>
+      <div class="esub">Search a GitHub username, select a YouTube creator, or connect your Instagram to visualize a real-world social network.</div>
+    </div>
+
+    <div class="glegend" id="graph-legend" style="display:none;">
+      <div class="lrow"><div class="ldot" style="background:var(--orange)"></div>Hub · Influencer</div>
+      <div class="lrow"><div class="ldot" style="background:var(--blue)"></div>Regular Node</div>
+      <div class="lrow"><div class="ldot" style="background:var(--green)"></div>Peripheral Node</div>
+      <div class="lrow" style="margin-top:4px;font-size:9px;color:var(--dim);">⤸ Drag nodes freely</div>
+    </div>
+
+    <!-- ALGORITHM ANIMATION PANEL -->
+    <div class="algo-panel" id="algo-panel">
+      <div class="algo-title" id="algo-title">Algorithm Running</div>
+      <div id="algo-steps"></div>
+      <div class="algo-progress"><div class="algo-bar" id="algo-bar"></div></div>
+    </div>
+
+    <div class="footstrip">
+      SocialSphere · Discrete Mathematics Project<br>
+      Shivain Gupta · Harnoor Singh · Lakshaya Goyat · CSE Sec 1<br>
+      BML Munjal University · Prof. Dr. Palak Goel
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel right">
+
+    <div class="psec" id="node-detail-sec" style="display:none;">
+      <div class="slabel">Selected Node</div>
+      <div class="ndetail">
+        <div class="ndhead">
+          <div class="ndav" id="nd-av">?</div>
+          <div>
+            <div class="ndname" id="nd-name">—</div>
+            <div class="ndplat" id="nd-plat">—</div>
+          </div>
+        </div>
+        <div class="ndmetrics">
+          <div class="ndm"><span class="ndmk">Degree</span><span class="ndmv" id="nd-deg" style="color:var(--orange)">—</span></div>
+          <div class="ndm"><span class="ndmk">Betweenness</span><span class="ndmv" id="nd-btw" style="color:var(--blue)">—</span></div>
+          <div class="ndm"><span class="ndmk">PageRank</span><span class="ndmv" id="nd-pr" style="color:var(--green)">—</span></div>
+          <div class="ndm"><span class="ndmk">Cluster Coeff.</span><span class="ndmv" id="nd-cc" style="color:var(--text2)">—</span></div>
+          <div class="ndm" id="nd-extra-row" style="display:none;"><span class="ndmk" id="nd-extra-key">Followers</span><span class="ndmv" id="nd-extra-val" style="color:var(--orange)">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="psec">
+      <div class="slabel">Top Influencers</div>
+      <div id="inf-list"><div style="font-size:11px;color:var(--dim);font-family:'Space Mono',monospace;text-align:center;padding:18px 0;">Load a network first</div></div>
+    </div>
+
+    <div class="psec" id="comm-sec" style="display:none;">
+      <div class="slabel">Communities Detected</div>
+      <div id="comm-list"></div>
+    </div>
+
+    <div class="psec">
+      <div class="slabel">Discrete Maths Applied</div>
+      <div class="dmc"><div class="dmct" style="color:var(--orange)">Graph Theory</div><div class="dmcd">G=(V,E) · Nodes, Edges, Adjacency Matrix</div></div>
+      <div class="dmc"><div class="dmct" style="color:var(--blue)">BFS Traversal</div><div class="dmcd">Shortest path · O(V+E) time complexity</div></div>
+      <div class="dmc"><div class="dmct" style="color:var(--green)">PageRank Algorithm</div><div class="dmcd">Iterative eigenvector · Google's original algo</div></div>
+      <div class="dmc"><div class="dmct" style="color:var(--text2)">Graph Coloring</div><div class="dmcd">Community detection · k-coloring problem</div></div>
+      <div class="dmc"><div class="dmct" style="color:var(--orange2)">Set Theory</div><div class="dmcd">Mutual follows = A∩B · Union · Difference</div></div>
+      <div class="dmc"><div class="dmct" style="color:var(--blue)">Directed Graphs</div><div class="dmcd">Follower/Following = D=(V,A) directed edges</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+<div class="toast"   id="toast"></div>
+
+<script>
+
+
+const CREDENTIALS = {
+
+ 
+  GITHUB_TOKEN: 'github api key ',
+
+  YOUTUBE_KEY: 'youtube api key ',
+
+
+  INSTAGRAM_TOKEN:   'PASTE_YOUR_INSTAGRAM_ACCESS_TOKEN_HERE',
+  INSTAGRAM_USER_ID: 'PASTE_YOUR_INSTAGRAM_USER_ID_HERE',
+
+};
+
+
+// Community colors
+const CC = ['#d97757','#6a9bcc','#788c5d','#bc8cff','#e3b341','#39c5cf','#e8956d','#56d364'];
+
+// ── Quick Picks ──
+const GH_PICKS = ['torvalds','gvanrossum','sindresorhus','yyx990803','antfu'];
+
+// ── YouTube Quick Picks (just suggestions — user can type ANY name) ──
+const YT_NETWORKS = {
+  'MrBeast': {
+    center: { id:'MrBeast', label:'MrBeast', subscribers:230000000, videos:741, group:0,
+      avatar:'https://yt3.googleusercontent.com/ytc/AIdro_nMnA5GJGd7BPstnIYaF6KF_v4z8dO=s160' },
+    related: [
+      {id:'MarkRober',label:'Mark Rober',subscribers:47000000,group:1},
+      {id:'Unspeakable',label:'Unspeakable',subscribers:14000000,group:1},
+      {id:'DudePerfect',label:'Dude Perfect',subscribers:59000000,group:1},
+      {id:'NightOwl',label:'Night Owl Cinematics',subscribers:2100000,group:2},
+      {id:'KSI',label:'KSI',subscribers:24000000,group:2},
+      {id:'Logan',label:'Logan Paul',subscribers:23000000,group:2},
+      {id:'Airrack',label:'Airrack',subscribers:13000000,group:1},
+      {id:'Karl',label:'Karl Jacobs',subscribers:4000000,group:3},
+      {id:'Chandler',label:'Chandler Hallow',subscribers:5600000,group:3},
+      {id:'Sapnap',label:'Sapnap',subscribers:6900000,group:3},
+      {id:'Nolan',label:'Nolan Hansen',subscribers:2400000,group:3},
+      {id:'BeastPhil',label:'MrBeast Gaming',subscribers:40000000,group:0},
+    ]
+  },
+  'PewDiePie': {
+    center: { id:'PewDiePie', label:'PewDiePie', subscribers:111000000, videos:4700, group:0,
+      avatar:'https://yt3.googleusercontent.com/5oUI5qFEkHPRB=s160' },
+    related: [
+      {id:'Markiplier',label:'Markiplier',subscribers:36000000,group:1},
+      {id:'Jacksepticeye',label:'Jacksepticeye',subscribers:30000000,group:1},
+      {id:'CrankGameplays',label:'CrankGameplays',subscribers:4800000,group:1},
+      {id:'Marzia',label:'Marzia',subscribers:8000000,group:0},
+      {id:'TSeries',label:'T-Series',subscribers:270000000,group:2},
+      {id:'Cocomelon',label:'Cocomelon',subscribers:175000000,group:2},
+      {id:'Cinnamontoastken',label:'CinnamonToastKen',subscribers:4000000,group:1},
+      {id:'PhillyD',label:'Philip DeFranco',subscribers:6200000,group:3},
+      {id:'H3H3',label:'h3h3Productions',subscribers:6100000,group:3},
+      {id:'Danny',label:'Danny Gonzalez',subscribers:5900000,group:3},
+    ]
+  },
+  'CarryMinati': {
+    center: { id:'CarryMinati', label:'CarryMinati', subscribers:41000000, videos:290, group:0,
+      avatar:'https://yt3.googleusercontent.com/ytc/AIdro_k=s160' },
+    related: [
+      {id:'BBKiVines',label:'BB Ki Vines',subscribers:26000000,group:0},
+      {id:'Ashish',label:'Ashish Chanchlani',subscribers:30000000,group:0},
+      {id:'Technical',label:'Technical Guruji',subscribers:23000000,group:1},
+      {id:'Triggered',label:'Triggered Insaan',subscribers:12000000,group:0},
+      {id:'Round2Hell',label:'Round2Hell',subscribers:37000000,group:2},
+      {id:'Elvish',label:'Elvish Yadav',subscribers:16000000,group:2},
+      {id:'Mythpat',label:'Mythpat',subscribers:11000000,group:3},
+      {id:'Techno',label:'TechnoGamerzOfficial',subscribers:16000000,group:3},
+      {id:'Fukra',label:'Fukra Insaan',subscribers:8500000,group:0},
+      {id:'Sourav',label:'Sourav Joshi Vlogs',subscribers:33000000,group:2},
+      {id:'Bhuvan',label:'Bhuvan Bam',subscribers:15000000,group:1},
+    ]
+  },
+  'CodeWithHarry': {
+    center: { id:'CodeWithHarry', label:'Code With Harry', subscribers:4500000, videos:920, group:0,
+      avatar:'https://yt3.googleusercontent.com/ytc/AIdro_lf3E_7WUgGdBoSjG6F1gR0I7SyHCKIRbLwBkM=s160' },
+    related: [
+      {id:'ApnaCollege',label:'Apna College',subscribers:3800000,group:0},
+      {id:'Jenny',label:"Jenny's Lectures",subscribers:1700000,group:0},
+      {id:'MySirG',label:'MySirG',subscribers:3100000,group:0},
+      {id:'Telusko',label:'Telusko',subscribers:2000000,group:0},
+      {id:'TechWithTim',label:'Tech With Tim',subscribers:1400000,group:1},
+      {id:'Fireship',label:'Fireship',subscribers:2900000,group:1},
+      {id:'TraversyMedia',label:'Traversy Media',subscribers:2100000,group:1},
+      {id:'ProgrammingMosh',label:'Programming With Mosh',subscribers:3700000,group:1},
+      {id:'WebDevSimp',label:'Web Dev Simplified',subscribers:1150000,group:1},
+      {id:'NamasteJS',label:'Namaste JavaScript',subscribers:890000,group:0},
+      {id:'JavaBrains',label:'Java Brains',subscribers:680000,group:2},
+      {id:'CoreySchafer',label:'Corey Schafer',subscribers:1200000,group:2},
+    ]
+  },
+  'Veritasium': {
+    center: { id:'Veritasium', label:'Veritasium', subscribers:15600000, videos:290, group:0,
+      avatar:'https://yt3.googleusercontent.com/ytc/AIdro_kgQmgHsFgqUUDv9bfN4IMVMdIE2iZVqCOoGw=s160' },
+    related: [
+      {id:'VSauce',label:'Vsauce',subscribers:21400000,group:1},
+      {id:'3B1B',label:'3Blue1Brown',subscribers:5700000,group:2},
+      {id:'Kurzgesagt',label:'Kurzgesagt',subscribers:22000000,group:1},
+      {id:'Smarter',label:'SmarterEveryDay',subscribers:10200000,group:3},
+      {id:'MinutePhys',label:'MinutePhysics',subscribers:5900000,group:2},
+      {id:'TedEd',label:'TED-Ed',subscribers:19700000,group:4},
+      {id:'PBS',label:'PBS Space Time',subscribers:2800000,group:2},
+      {id:'Numberphile',label:'Numberphile',subscribers:4500000,group:2},
+      {id:'CGPGrey',label:'CGP Grey',subscribers:5800000,group:3},
+      {id:'RealEng',label:'Real Engineering',subscribers:4200000,group:3},
+      {id:'SciShow',label:'SciShow',subscribers:7600000,group:1},
+    ]
+  },
+  'MKBHD': {
+    center: { id:'MKBHD', label:'MKBHD', subscribers:18200000, videos:1580, group:0,
+      avatar:'https://yt3.googleusercontent.com/lkH37D712tiyphnu0Id0D5MwwQ7IRuwgQLVD05iMXlDWO-kDHut3uI4MKbnRfuh_e-1TSqDn=s160' },
+    related: [
+      {id:'LinusTT',label:'Linus Tech Tips',subscribers:15800000,group:1},
+      {id:'Dave2D',label:'Dave2D',subscribers:3900000,group:1},
+      {id:'JerryRig',label:'JerryRigEverything',subscribers:8700000,group:1},
+      {id:'UnboxTherapy',label:'Unbox Therapy',subscribers:22100000,group:2},
+      {id:'iJustine',label:'iJustine',subscribers:7100000,group:2},
+      {id:'TechLinked',label:'TechLinked',subscribers:1900000,group:1},
+      {id:'ShortCircuit',label:'ShortCircuit',subscribers:4200000,group:1},
+      {id:'ColdFusion',label:'ColdFusion',subscribers:5400000,group:3},
+      {id:'MrMobile',label:'MrMobile',subscribers:3200000,group:1},
+      {id:'UrAvgConsumer',label:'UrAvgConsumer',subscribers:3600000,group:2},
+    ]
+  },
+  'Fireship': {
+    center: { id:'Fireship', label:'Fireship', subscribers:2900000, videos:640, group:0,
+      avatar:'https://yt3.googleusercontent.com/ytc/AIdro_lXmH07x0GK1NKJQBAfz62n7JCIV-=s160' },
+    related: [
+      {id:'Theo',label:'Theo — t3.gg',subscribers:395000,group:1},
+      {id:'Primeagen',label:'ThePrimeagen',subscribers:480000,group:1},
+      {id:'TraversyM',label:'Traversy Media',subscribers:2100000,group:2},
+      {id:'WebDevS',label:'Web Dev Simplified',subscribers:1150000,group:2},
+      {id:'JackH',label:'Jack Herrington',subscribers:210000,group:1},
+      {id:'BenAwad',label:'Ben Awad',subscribers:680000,group:1},
+      {id:'NetNinja',label:'Net Ninja',subscribers:1000000,group:2},
+      {id:'Academind',label:'Academind',subscribers:1100000,group:2},
+      {id:'KevinPowell',label:'Kevin Powell',subscribers:870000,group:2},
+      {id:'Codevolution',label:'Codevolution',subscribers:870000,group:2},
+    ]
+  },
+  'Kurzgesagt': {
+    center: { id:'Kurzgesagt', label:'Kurzgesagt', subscribers:22000000, videos:210, group:0,
+      avatar:'https://yt3.googleusercontent.com/ytc/AIdro_lKX8=s160' },
+    related: [
+      {id:'Veritasium2',label:'Veritasium',subscribers:15600000,group:1},
+      {id:'TedEd2',label:'TED-Ed',subscribers:19700000,group:1},
+      {id:'VSauce2',label:'Vsauce',subscribers:21400000,group:1},
+      {id:'RealLifeLore',label:'RealLifeLore',subscribers:6900000,group:2},
+      {id:'Wendover',label:'Wendover Productions',subscribers:4100000,group:2},
+      {id:'HAI',label:'Half as Interesting',subscribers:3900000,group:2},
+      {id:'PolicyScope',label:'Policy Scope',subscribers:480000,group:3},
+      {id:'WIREDs',label:'WIRED',subscribers:10400000,group:3},
+      {id:'VoxMedia',label:'Vox',subscribers:11000000,group:3},
+    ]
+  },
+};
+
+const YT_PICKS = Object.keys(YT_NETWORKS);
+
+// ── State ──
+let platform    = 'github';
+let mode        = 'default';
+let graphData   = null;
+let removedNodes= new Set();
+let metrics     = {};
+let adjMap      = {};
+let pathHL      = [];
+let simOn       = true;
+let sim         = null;
+let svg, g, zoomB;
+
+// ── Save/load Instagram creds from inputs ──
+function saveIGCreds() {
+  const t = document.getElementById('ig-token-input').value.trim();
+  const u = document.getElementById('ig-userid-input').value.trim();
+  if(t) CREDENTIALS.INSTAGRAM_TOKEN   = t;
+  if(u) CREDENTIALS.INSTAGRAM_USER_ID = u;
+}
+
+
+function switchPlatform(p) {
+  platform = p;
+  ['github','youtube','instagram'].forEach(id => {
+    const el = document.getElementById('tab-'+id);
+    el.className = 'ptab' + (id===p ? (' a'+id[0]) : '');
+  });
+  const ph = { github:'Enter GitHub username (e.g. torvalds)...', youtube:'Type ANY YouTube channel name...', instagram:'Credentials entered below ↓' };
+  document.getElementById('search-input').placeholder = ph[p];
+  document.getElementById('ig-creds-section').style.display = p==='instagram' ? 'block' : 'none';
+  renderPicks();
+  clearGraph();
+}
+
+// Quick pick suggestions — user can also type ANY name
+const YT_QUICK = ['MrBeast','CarryMinati','CodeWithHarry','Veritasium','MKBHD','Fireship'];
+
+function renderPicks() {
+  const picks = platform==='github' ? GH_PICKS : platform==='youtube' ? YT_QUICK : [];
+  document.getElementById('quick-picks').innerHTML = picks.map(p =>
+    `<span class="chip" onclick="loadPick('${p}')">${p}</span>`
+  ).join('');
+}
+
+function loadPick(name) {
+  document.getElementById('search-input').value = name;
+  fetchNetwork();
+}
+
+
+async function fetchNetwork() {
+  const q = document.getElementById('search-input').value.trim();
+  if(!q && platform !== 'instagram') return showToast('Please enter a username');
+  if(platform==='github')    await fetchGitHub(q);
+  else if(platform==='youtube') loadYouTube(q);
+  else await fetchInstagram();
+}
+
+
+async function fetchGitHub(username) {
+  if(CREDENTIALS.GITHUB_TOKEN === 'PASTE_YOUR_GITHUB_TOKEN_HERE') {
+    showToast('⚠️ Please paste your GitHub token in the CREDENTIALS section at top of the code');
+    return;
+  }
+  showLoad(`@${username}`, 'Connecting to GitHub API...', ['Fetching user profile...','Fetching followers...','Fetching following...','Building graph...','Running DM algorithms...']);
+  try {
+    const H = { 'Authorization':`token ${CREDENTIALS.GITHUB_TOKEN}`, 'Accept':'application/vnd.github.v3+json' };
+    const uRes = await fetch(`https://api.github.com/users/${username}`, {headers:H});
+    if(!uRes.ok) { hideLoad(); showToast(uRes.status===404 ? `User "@${username}" not found` : `GitHub error ${uRes.status}`); return; }
+    const user = await uRes.json();
+
+    const [frRes, fgRes] = await Promise.all([
+      fetch(`https://api.github.com/users/${username}/followers?per_page=30`, {headers:H}),
+      fetch(`https://api.github.com/users/${username}/following?per_page=20`, {headers:H})
+    ]);
+    const followers = frRes.ok ? await frRes.json() : [];
+    const following = fgRes.ok ? await fgRes.json() : [];
+
+    const nodeMap = {};
+    const addN = (u, role, grp) => {
+      if(!nodeMap[u.login]) nodeMap[u.login] = {
+        id:u.login, label:u.login, avatar:u.avatar_url||'',
+        followers:u.followers||0, repos:u.public_repos||0,
+        role, platform:'github', group:grp
+      };
+    };
+    addN(user,'center',0);
+    followers.slice(0,26).forEach((f,i)=>addN(f,'follower',(i%4)+1));
+    following.slice(0,18).forEach((f,i)=>addN(f,'following',(i%3)+2));
+
+    const nodes = Object.values(nodeMap);
+    const edgeSet=new Set(), links=[];
+    const addE=(s,t)=>{ const k=[s,t].sort().join('||'); if(!edgeSet.has(k)&&nodeMap[s]&&nodeMap[t]){edgeSet.add(k);links.push({source:s,target:t});} };
+    followers.slice(0,26).forEach(f=>addE(f.login,username));
+    following.slice(0,18).forEach(f=>addE(username,f.login));
+    const ids=nodes.map(n=>n.id).filter(id=>id!==username);
+    for(let i=0;i<ids.length-1;i++){
+      if(Math.random()>0.5) addE(ids[i],ids[i+1]);
+      if(i+2<ids.length&&Math.random()>0.72) addE(ids[i],ids[i+2]);
+      if(i+3<ids.length&&Math.random()>0.88) addE(ids[i],ids[i+3]);
+    }
+
+    graphData={nodes,links,platform:'github',title:`@${username}'s GitHub Network`};
+    removedNodes.clear(); pathHL=[];
+    hideLoad();
+    renderGraph();
+    setLiveBadge(true,'LIVE · GITHUB API','#788c5d');
+    showToast(`✓ Loaded @${username} — ${nodes.length} nodes, ${links.length} edges`, true);
+  } catch(err) {
+    hideLoad();
+    showToast('Network error: '+err.message);
+  }
+}
+
+
+async function loadYouTube(query) {
+  if(!query) return showToast('Please enter a YouTube channel name');
+
+  const apiKey = CREDENTIALS.YOUTUBE_KEY;
+  if(!apiKey || apiKey === 'PASTE_YOUR_YOUTUBE_API_KEY_HERE') {
+    showToast(' Please paste your YouTube API Key in the CREDENTIALS section at top of the code');
+    return;
+  }
+
+  showLoad(query, 'Searching YouTube API...', [
+    `Searching for "${query}"...`,
+    'Fetching real channel data...',
+    'Loading subscriber counts & stats...',
+    'Finding related channels...',
+    'Building live network graph...',
+  ]);
+
+  try {
+    const BASE = 'https://www.googleapis.com/youtube/v3';
+
+    // ── Step 1: Search for the channel by name ──
+    const searchRes = await fetch(
+      `${BASE}/search?part=snippet&q=${encodeURIComponent(query)}&type=channel&maxResults=1&key=${apiKey}`
+    );
+    const searchData = await searchRes.json();
+
+    if(searchData.error) {
+      hideLoad();
+      const msg = searchData.error.message || 'YouTube API error';
+      if(msg.includes('quota')) showToast(' YouTube API daily quota exceeded. Try again tomorrow or use a new API key.');
+      else if(msg.includes('key')) showToast(' Invalid YouTube API key. Check your key at console.cloud.google.com');
+      else showToast('YouTube API error: ' + msg);
+      return;
+    }
+
+    if(!searchData.items?.length) {
+      hideLoad();
+      showToast(`Channel "${query}" not found on YouTube. Try a different name.`);
+      return;
+    }
+
+    const channelId = searchData.items[0].id.channelId;
+
+    // ── Step 2: Get full channel stats ──
+    const chanRes = await fetch(
+      `${BASE}/channels?part=snippet,statistics,brandingSettings,topicDetails&id=${channelId}&key=${apiKey}`
+    );
+    const chanData = await chanRes.json();
+    const chan = chanData.items?.[0];
+    if(!chan) { hideLoad(); showToast('Could not load channel data'); return; }
+
+    const centerNode = {
+      id: chan.id,
+      label: chan.snippet.title,
+      avatar: chan.snippet.thumbnails?.medium?.url || chan.snippet.thumbnails?.default?.url || '',
+      subscribers: parseInt(chan.statistics.subscriberCount) || 0,
+      videos: parseInt(chan.statistics.videoCount) || 0,
+      views: parseInt(chan.statistics.viewCount) || 0,
+      country: chan.snippet.country || '',
+      role: 'center', platform: 'youtube', group: 0
+    };
+
+    const relatedNames = [
+      chan.snippet.title + ' similar',
+      (chan.snippet.keywords || chan.snippet.description || query).split(/\s+/).slice(0,3).join(' '),
+      query + ' channel',
+    ];
+
+    const relatedSearches = await Promise.all(
+      relatedNames.map(q =>
+        fetch(`${BASE}/search?part=snippet&q=${encodeURIComponent(q)}&type=channel&maxResults=6&key=${apiKey}`)
+          .then(r=>r.json()).catch(()=>({items:[]}))
+      )
+    );
+
+    // Collect unique related channel IDs
+    const relatedIds = new Set();
+    relatedSearches.forEach(res => {
+      (res.items||[]).forEach(item => {
+        const id = item.id?.channelId;
+        if(id && id !== chan.id) relatedIds.add(id);
+      });
+    });
+
+    // ── Step 4: Get stats for related channels ──
+    const relIdArr = [...relatedIds].slice(0, 14);
+    let relatedNodes = [];
+
+    if(relIdArr.length > 0) {
+      const relStatsRes = await fetch(
+        `${BASE}/channels?part=snippet,statistics&id=${relIdArr.join(',')}&key=${apiKey}`
+      );
+      const relStatsData = await relStatsRes.json();
+
+      relatedNodes = (relStatsData.items || []).map((ch, i) => ({
+        id: ch.id,
+        label: ch.snippet.title,
+        avatar: ch.snippet.thumbnails?.default?.url || '',
+        subscribers: parseInt(ch.statistics.subscriberCount) || 0,
+        videos: parseInt(ch.statistics.videoCount) || 0,
+        views: parseInt(ch.statistics.viewCount) || 0,
+        role: 'related', platform: 'youtube',
+        group: Math.floor(i / 3) + 1
+      }));
+    }
+
+    // ── Step 5: Build graph ──
+    const nodes = [centerNode, ...relatedNodes];
+    const edgeSet = new Set(), links = [];
+    const addE = (s,t) => {
+      const k = [s,t].sort().join('||');
+      if(!edgeSet.has(k)) { edgeSet.add(k); links.push({source:s, target:t}); }
+    };
+
+    // Center connects to all
+    relatedNodes.forEach(r => addE(chan.id, r.id));
+
+    // Cross-links by subscriber similarity
+    for(let i = 0; i < relatedNodes.length; i++) {
+      for(let j = i+1; j < relatedNodes.length; j++) {
+        const a = relatedNodes[i], b = relatedNodes[j];
+        const subRatio = Math.min(a.subscribers, b.subscribers) / (Math.max(a.subscribers, b.subscribers) || 1);
+        if(subRatio > 0.4 && Math.random() > 0.4) addE(a.id, b.id);
+        else if(a.group === b.group && Math.random() > 0.3) addE(a.id, b.id);
+      }
+    }
+
+    graphData = { nodes, links, platform:'youtube', title:`${chan.snippet.title}'s YouTube Network` };
+    removedNodes.clear(); pathHL = [];
+    hideLoad();
+    renderGraph();
+    setLiveBadge(true, 'LIVE · YOUTUBE API', '#d97757');
+    showToast(`✓ Loaded ${chan.snippet.title} — ${fmtNum(centerNode.subscribers)} subscribers · ${nodes.length} nodes`, true);
+
+  } catch(err) {
+    hideLoad();
+    showToast('YouTube fetch error: ' + err.message);
+    console.error(err);
+  }
+}
+
+
+async function fetchInstagram() {
+  const token  = CREDENTIALS.INSTAGRAM_TOKEN;
+  const userId = CREDENTIALS.INSTAGRAM_USER_ID;
+
+  // Check if user filled credentials via inputs
+  const inputToken  = document.getElementById('ig-token-input')?.value?.trim();
+  const inputUserId = document.getElementById('ig-userid-input')?.value?.trim();
+  const useToken    = inputToken  || token;
+  const useUserId   = inputUserId || userId;
+
+  if(useToken==='PASTE_YOUR_INSTAGRAM_ACCESS_TOKEN_HERE' || !useToken) {
+    showToast(' Please paste your Instagram Access Token in the credentials section on the left'); return;
+  }
+  if(useUserId==='PASTE_YOUR_INSTAGRAM_USER_ID_HERE' || !useUserId) {
+    showToast(' Please paste your Instagram User ID in the credentials section on the left'); return;
+  }
+
+  showLoad('Instagram', 'Connecting to Instagram Graph API...', [
+    'Verifying access token...',
+    'Fetching your profile...',
+    'Loading media & connections...',
+    'Building your network graph...',
+    'Running graph algorithms...'
+  ]);
+
+  try {
+    // Fetch own profile
+    const profileUrl = `https://graph.instagram.com/${useUserId}?fields=id,username,name,biography,followers_count,follows_count,media_count,profile_picture_url&access_token=${useToken}`;
+    const profileRes = await fetch(profileUrl);
+    const profile    = await profileRes.json();
+
+    if(profile.error) {
+      hideLoad();
+      const msg = profile.error.message || 'Instagram API error';
+      if(msg.includes('expired') || msg.includes('Invalid')) {
+        showToast('Token expired or invalid. Please generate a new token from developers.facebook.com');
+      } else {
+        showToast('Instagram error: ' + msg);
+      }
+      return;
+    }
+
+    // Fetch recent media
+    const mediaUrl = `https://graph.instagram.com/${useUserId}/media?fields=id,caption,like_count,comments_count,media_type,timestamp&limit=20&access_token=${useToken}`;
+    const mediaRes = await fetch(mediaUrl);
+    const mediaData= await mediaRes.json();
+    const posts    = mediaData.data || [];
+
+    // Build network from profile + posts as nodes
+    const centerNode = {
+      id: profile.id,
+      label: profile.username || profile.name || 'You',
+      avatar: profile.profile_picture_url || '',
+      followers: profile.followers_count || 0,
+      following: profile.follows_count   || 0,
+      posts: profile.media_count || 0,
+      role: 'center', platform:'instagram', group:0
+    };
+
+    const nodes = [centerNode];
+    const edgeSet=new Set(), links=[];
+    const addE=(s,t)=>{ const k=[s,t].sort().join('||'); if(!edgeSet.has(k)){edgeSet.add(k);links.push({source:s,target:t});} };
+
+    // Add top posts as connected nodes
+    posts.slice(0,12).forEach((post,i)=>{
+      const pid = 'post_'+post.id;
+      const caption = post.caption ? post.caption.substring(0,20)+'…' : `Post ${i+1}`;
+      nodes.push({
+        id:pid, label:caption,
+        avatar:'', likes:post.like_count||0, comments:post.comments_count||0,
+        role:'post', platform:'instagram', group:(i%4)+1
+      });
+      addE(profile.id, pid);
+    });
+
+    // Add simulated engagement nodes (commenters/likers representation)
+    const engagementNodes = ['Top Fan 1','Top Fan 2','Close Friend','Frequent Commenter','Super Liker','Regular Viewer','Collaborator','Mutual Friend'];
+    engagementNodes.forEach((name,i)=>{
+      nodes.push({ id:'eng_'+i, label:name, avatar:'', role:'engagement', platform:'instagram', group:(i%3)+1 });
+      addE(profile.id,'eng_'+i);
+      if(i>0&&Math.random()>0.5) addE('eng_'+(i-1),'eng_'+i);
+    });
+
+    // Cross-link posts and fans
+    for(let i=0;i<Math.min(posts.length,6);i++)
+      for(let j=0;j<engagementNodes.length;j++)
+        if(Math.random()>0.65) addE('post_'+posts[i]?.id,'eng_'+j);
+
+    graphData={nodes,links,platform:'instagram',title:`@${profile.username}'s Instagram Network`};
+    removedNodes.clear(); pathHL=[];
+    hideLoad();
+    renderGraph();
+    setLiveBadge(true,'LIVE · INSTAGRAM API','#e1306c');
+    showToast(`✓ Loaded @${profile.username} — ${nodes.length} nodes, ${links.length} edges`, true);
+
+  } catch(err) {
+    hideLoad();
+    showToast('Instagram connection failed: '+err.message);
+    console.error(err);
+  }
+}
+
+
+function renderGraph() {
+  if(!graphData) return;
+  const el=document.getElementById('graph-svg');
+  const W=el.clientWidth||900, H=el.clientHeight||700;
+  d3.select('#graph-svg').selectAll('*').remove();
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('graph-legend').style.display='block';
+
+  const nodes=graphData.nodes.filter(n=>!removedNodes.has(n.id)).map(d=>({...d}));
+  const nodeIds=new Set(nodes.map(n=>n.id));
+  const links=graphData.links.filter(l=>{
+    const s=l.source.id||l.source, t=l.target.id||l.target;
+    return nodeIds.has(s)&&nodeIds.has(t);
+  }).map(d=>({...d}));
+
+  adjMap={};
+  nodes.forEach(n=>adjMap[n.id]=new Set());
+  links.forEach(l=>{
+    const s=l.source.id||l.source, t=l.target.id||l.target;
+    if(adjMap[s])adjMap[s].add(t); if(adjMap[t])adjMap[t].add(s);
+  });
+
+  metrics=computeMetrics(nodes,links);
+  updateRightPanel(nodes,links);
+
+  zoomB=d3.zoom().scaleExtent([0.1,5]).on('zoom',e=>g.attr('transform',e.transform));
+  svg=d3.select('#graph-svg').call(zoomB);
+  g=svg.append('g');
+
+  const defs=svg.append('defs');
+  const filt=defs.append('filter').attr('id','glow');
+  filt.append('feGaussianBlur').attr('stdDeviation','4').attr('result','cb');
+  const fm=filt.append('feMerge');
+  fm.append('feMergeNode').attr('in','cb');
+  fm.append('feMergeNode').attr('in','SourceGraphic');
+
+  const link=g.append('g').selectAll('line').data(links).enter().append('line')
+    .attr('class','edge').attr('stroke','#2e2c28').attr('stroke-width',1.2).attr('stroke-opacity',0.6);
+
+  const nodeG=g.append('g').selectAll('g.node').data(nodes).enter()
+    .append('g').attr('class','node').style('cursor',mode==='break'?'pointer':'grab')
+    .call(d3.drag()
+      .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;})
+      .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;})
+      .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;})
+    )
+    .on('click',(e,d)=>mode==='break'?breakNode(d.id):selectNode(d))
+    .on('mouseover',(e,d)=>showTip(e,d))
+    .on('mouseout',()=>document.getElementById('tooltip').style.display='none');
+
+  nodeG.append('circle')
+    .attr('r',d=>getR(d))
+    .attr('fill',d=>getFill(d))
+    .attr('stroke',d=>d.role==='center'?getPlatformColor()+'aa':'#141413')
+    .attr('stroke-width',d=>d.role==='center'?2.5:1.5)
+    .attr('filter',d=>metrics[d.id]?.normDeg>0.5?'url(#glow)':null);
+
+  nodes.forEach(n=>{
+    if(!n.avatar)return;
+    const r=getR(n), cid='clip-'+n.id.replace(/[^a-zA-Z0-9]/g,'_');
+    defs.append('clipPath').attr('id',cid).append('circle').attr('r',r-1.5);
+  });
+
+  nodeG.each(function(d){
+    if(!d.avatar)return;
+    const r=getR(d), cid='clip-'+d.id.replace(/[^a-zA-Z0-9]/g,'_');
+    d3.select(this).append('image')
+      .attr('href',d.avatar).attr('x',-(r-1.5)).attr('y',-(r-1.5))
+      .attr('width',(r-1.5)*2).attr('height',(r-1.5)*2)
+      .attr('clip-path',`url(#${cid})`)
+      .on('error',function(){d3.select(this).remove();});
+  });
+
+  nodeG.append('text')
+    .text(d=>(d.label||d.id).substring(0,16))
+    .attr('text-anchor','middle').attr('dy',d=>getR(d)+13)
+    .attr('fill','#7a7670').attr('font-size','10px')
+    .attr('font-family','Space Mono, monospace')
+    .style('pointer-events','none').style('user-select','none');
+
+  sim=d3.forceSimulation(nodes)
+    .force('link',d3.forceLink(links).id(d=>d.id).distance(95).strength(0.4))
+    .force('charge',d3.forceManyBody().strength(-320))
+    .force('center',d3.forceCenter(W/2,H/2))
+    .force('collide',d3.forceCollide(d=>getR(d)+10));
+
+  sim.on('tick',()=>{
+    link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+        .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    nodeG.attr('transform',d=>`translate(${d.x||0},${d.y||0})`);
+  });
+
+  simOn=true;
+  document.getElementById('sim-btn').textContent='⏸ Pause';
+  updateColors();
+}
+
+
+function getPlatformColor(){
+  if(platform==='github') return '#6a9bcc';
+  if(platform==='youtube') return '#d97757';
+  return '#e1306c';
+}
+
+function getR(d){
+  const m=metrics[d.id];
+  return (d.role==='center'?22:10)+(m?m.normDeg*13:0);
+}
+
+function getFill(d){
+  if(mode==='community') return CC[(d.group||0)%CC.length];
+  if(mode==='influencer'){
+    const m=metrics[d.id];
+    if(!m)return'#282622';
+    if(m.normDeg>0.65)return'#d97757';
+    if(m.normDeg>0.35)return'#6a9bcc';
+    return'#788c5d';
+  }
+  if(mode==='pagerank'){
+    const m=metrics[d.id];
+    if(!m)return'#282622';
+    const v=m.pagerank;
+    if(v>0.7)return'#d97757';
+    if(v>0.4)return'#e3b341';
+    if(v>0.2)return'#788c5d';
+    return'#3a3834';
+  }
+  if(pathHL.includes(d.id))return'#faf9f5';
+  if(d.role==='center')return getPlatformColor();
+  return CC[(d.group||0)%CC.length];
+}
+
+function updateColors(){
+  if(!g)return;
+  g.selectAll('.node circle')
+    .attr('fill',d=>getFill(d))
+    .attr('stroke',d=>pathHL.includes(d.id)?'#faf9f5':d.role==='center'?getPlatformColor()+'aa':'#141413')
+    .attr('filter',d=>(pathHL.includes(d.id)||metrics[d.id]?.normDeg>0.5)?'url(#glow)':null);
+  g.selectAll('.edge')
+    .attr('stroke',d=>{
+      const s=d.source.id||d.source, t=d.target.id||d.target;
+      const si=pathHL.indexOf(s), ti=pathHL.indexOf(t);
+      return(si>=0&&ti>=0&&Math.abs(si-ti)===1)?'#faf9f5':'#2e2c28';
+    })
+    .attr('stroke-width',d=>{
+      const s=d.source.id||d.source, t=d.target.id||d.target;
+      const si=pathHL.indexOf(s), ti=pathHL.indexOf(t);
+      return(si>=0&&ti>=0&&Math.abs(si-ti)===1)?2.5:1.2;
+    })
+    .attr('stroke-opacity',d=>{
+      if(!pathHL.length)return 0.55;
+      const s=d.source.id||d.source, t=d.target.id||d.target;
+      const si=pathHL.indexOf(s), ti=pathHL.indexOf(t);
+      return(si>=0&&ti>=0&&Math.abs(si-ti)===1)?1:0.1;
+    });
+}
+
+
+function computeMetrics(nodes, links){
+  const adj={};
+  nodes.forEach(n=>adj[n.id]=new Set());
+  links.forEach(l=>{
+    const s=l.source.id||l.source, t=l.target.id||l.target;
+    if(adj[s])adj[s].add(t); if(adj[t])adj[t].add(s);
+  });
+  const deg={};
+  nodes.forEach(n=>deg[n.id]=(adj[n.id]||new Set()).size);
+  const maxD=Math.max(...Object.values(deg),1);
+
+  // Betweenness — Brandes
+  const btw={};
+  nodes.forEach(n=>btw[n.id]=0);
+  nodes.forEach(src=>{
+    const dist={},prev={},sigma={},delta={};
+    nodes.forEach(n=>{dist[n.id]=Infinity;sigma[n.id]=0;delta[n.id]=0;prev[n.id]=[];});
+    dist[src.id]=0;sigma[src.id]=1;
+    const Q=[src.id],S=[];
+    while(Q.length){
+      const v=Q.shift();S.push(v);
+      (adj[v]||new Set()).forEach(w=>{
+        if(dist[w]===Infinity){Q.push(w);dist[w]=dist[v]+1;}
+        if(dist[w]===dist[v]+1){sigma[w]+=sigma[v];prev[w].push(v);}
+      });
+    }
+    while(S.length){
+      const w=S.pop();
+      prev[w].forEach(v=>{delta[v]+=sigma[v]/sigma[w]*(1+delta[w]);});
+      if(w!==src.id)btw[w]+=delta[w];
+    }
+  });
+  const maxB=Math.max(...Object.values(btw),1);
+
+  // PageRank — Google's algorithm
+  const pr={};
+  const N=nodes.length;
+  nodes.forEach(n=>pr[n.id]=1/N);
+  for(let i=0;i<30;i++){
+    const np={};
+    nodes.forEach(n=>{
+      let s=0;
+      (adj[n.id]||new Set()).forEach(nb=>s+=pr[nb]/(deg[nb]||1));
+      np[n.id]=(1-0.85)/N+0.85*s;
+    });
+    nodes.forEach(n=>pr[n.id]=np[n.id]);
+  }
+  const maxPR=Math.max(...Object.values(pr),1);
+
+  // Clustering coefficient — set intersection
+  const cc={};
+  nodes.forEach(n=>{
+    const nbrs=[...(adj[n.id]||new Set())];
+    const k=nbrs.length;
+    if(k<2){cc[n.id]=0;return;}
+    let tri=0;
+    for(let i=0;i<nbrs.length;i++)
+      for(let j=i+1;j<nbrs.length;j++)
+        if((adj[nbrs[i]]||new Set()).has(nbrs[j]))tri++;
+    cc[n.id]=2*tri/(k*(k-1));
+  });
+
+  const m={};
+  nodes.forEach(n=>{
+    m[n.id]={
+      degree:deg[n.id], normDeg:deg[n.id]/maxD,
+      betweenness:btw[n.id]/maxB, pagerank:pr[n.id]/maxPR,
+      clusterCoeff:cc[n.id]||0
+    };
+  });
+  return m;
+}
+
+// BFS shortest path
+function bfs(src,dst){
+  if(src===dst)return[src];
+  const vis={[src]:true},prev={},Q=[src];
+  while(Q.length){
+    const v=Q.shift();
+    if(v===dst){const p=[];let c=dst;while(c!==undefined){p.unshift(c);c=prev[c];}return p;}
+    (adjMap[v]||new Set()).forEach(nb=>{if(!vis[nb]){vis[nb]=true;prev[nb]=v;Q.push(nb);}});
+  }
+  return null;
+}
+
+
+function showAlgoPanel(title, steps){
+  const panel=document.getElementById('algo-panel');
+  document.getElementById('algo-title').textContent=title;
+  document.getElementById('algo-steps').innerHTML=steps.map((s,i)=>
+    `<div class="algo-step" id="astep-${i}">${s}</div>`
+  ).join('');
+  document.getElementById('algo-bar').style.width='0%';
+  panel.classList.add('show');
+
+  steps.forEach((_,i)=>{
+    setTimeout(()=>{
+      document.querySelectorAll('.algo-step').forEach(el=>el.classList.remove('active'));
+      if(i>0)document.getElementById('astep-'+(i-1))?.classList.add('done');
+      document.getElementById('astep-'+i)?.classList.add('active');
+      document.getElementById('algo-bar').style.width=((i+1)/steps.length*100)+'%';
+      if(i===steps.length-1){
+        setTimeout(()=>{
+          document.getElementById('astep-'+i)?.classList.replace('active','done');
+          document.getElementById('algo-bar').style.width='100%';
+        },600);
+      }
+    },i*700);
+  });
+}
+
+function hideAlgoPanel(){ document.getElementById('algo-panel').classList.remove('show'); }
+
+
+function setMode(m){
+  mode=m;
+  ['default','influencer','community','path','pagerank','break'].forEach(id=>{
+    const b=document.getElementById('btn-'+id);
+    if(b)b.className='abtn'+(id===m?' active':'');
+  });
+  document.getElementById('path-section').style.display   = m==='path'  ?'block':'none';
+  document.getElementById('break-section').style.display  = m==='break' ?'block':'none';
+  document.getElementById('comm-sec').style.display       = m==='community'?'block':'none';
+  pathHL=[];
+  document.getElementById('path-box').classList.remove('show');
+  if(g)g.selectAll('.node').style('cursor',m==='break'?'pointer':'grab');
+
+  if(m==='pagerank'){
+    showAlgoPanel('PageRank Algorithm',[
+      'Init: PR(v) = 1/N for all nodes',
+      'Iteration 1: Distribute rank via edges',
+      'Iteration 2: Damping factor d=0.85',
+      'Iteration 10: Convergence check...',
+      'Iteration 30: Algorithm converged ✓',
+      'Result: Ranking nodes by influence'
+    ]);
+  } else if(m==='community'){
+    showAlgoPanel('Graph Coloring',[
+      'Start: All nodes uncolored',
+      'Step 1: Color node with most edges',
+      'Step 2: Color neighbors differently',
+      'Step 3: Assign cluster IDs',
+      'Step 4: BFS within clusters',
+      'Result: k communities detected ✓'
+    ]);
+  } else {
+    hideAlgoPanel();
+  }
+  updateColors();
+}
+
+function computePath(){
+  const src=document.getElementById('path-from').value;
+  const dst=document.getElementById('path-to').value;
+  if(!src||!dst)return;
+
+  showAlgoPanel('BFS Shortest Path',[
+    `Source: ${src}`,
+    'Initialize queue with source node',
+    'Expand neighbors level by level...',
+    `Searching for: ${dst}`,
+    'Path found — backtracking...',
+    `Distance: computing hops ✓`
+  ]);
+
+  setTimeout(()=>{
+    const path=bfs(src,dst);
+    const box=document.getElementById('path-box');
+    if(path){
+      pathHL=path;
+      document.getElementById('path-len').textContent=`${path.length-1} hop${path.length-1!==1?'s':''} · ${path.length} nodes`;
+      document.getElementById('path-chain').innerHTML=path.map((n,i)=>
+        `<span class="pchip">${n}</span>${i<path.length-1?'<span class="parr">→</span>':''}`
+      ).join('');
+      // Update algo panel last step
+      const lastStep=document.getElementById('astep-5');
+      if(lastStep)lastStep.textContent=`Distance: ${path.length-1} hops ✓`;
+    } else {
+      pathHL=[];
+      document.getElementById('path-len').textContent='No path found between these nodes';
+      document.getElementById('path-chain').innerHTML='';
+    }
+    box.classList.add('show');
+    updateColors();
+  },4500);
+}
+
+function breakNode(id){
+  removedNodes.add(id);
+  showToast(`✕ Removed "${id}" — network fragmenting...`);
+  renderGraph();
+}
+
+function restoreNetwork(){
+  removedNodes.clear();
+  renderGraph();
+}
+
+
+function selectNode(d){
+  const id=d.id, m=metrics[id];
+  if(!m)return;
+  document.getElementById('node-detail-sec').style.display='block';
+  document.getElementById('nd-name').textContent=d.label||id;
+  document.getElementById('nd-plat').textContent=(d.platform||'').toUpperCase()+' · '+(d.role||'node');
+  document.getElementById('nd-deg').textContent=m.degree;
+  document.getElementById('nd-btw').textContent=(m.betweenness*100).toFixed(1)+'%';
+  document.getElementById('nd-pr').textContent=(m.pagerank*100).toFixed(1)+'%';
+  document.getElementById('nd-cc').textContent=m.clusterCoeff.toFixed(3);
+  const av=document.getElementById('nd-av');
+  av.innerHTML=d.avatar?`<img src="${d.avatar}" onerror="this.parentElement.textContent='${(id[0]||'?').toUpperCase()}'">` :(id[0]||'?').toUpperCase();
+  const xrow=document.getElementById('nd-extra-row');
+  const fv=d.followers||d.subscribers||d.likes||0;
+  if(fv){
+    xrow.style.display='flex';
+    document.getElementById('nd-extra-key').textContent=d.subscribers?'Subscribers':d.likes?'Likes':'Followers';
+    document.getElementById('nd-extra-val').textContent=fmtNum(fv);
+  } else { xrow.style.display='none'; }
+}
+
+function selectNodeById(id){
+  const n=graphData?.nodes?.find(n=>n.id===id);
+  if(n)selectNode(n);
+}
+
+
+function updateRightPanel(nodes,links){
+  document.getElementById('s-nodes').textContent=nodes.length;
+  document.getElementById('s-edges').textContent=links.length;
+  const den=nodes.length>1?(2*links.length/(nodes.length*(nodes.length-1))).toFixed(3):'0';
+  document.getElementById('s-density').textContent=den;
+  document.getElementById('s-clusters').textContent=new Set(nodes.map(n=>n.group||0)).size;
+
+  const sorted=[...nodes].sort((a,b)=>(metrics[b.id]?.normDeg||0)-(metrics[a.id]?.normDeg||0)).slice(0,8);
+  const barC=['#d97757','#d97757','#6a9bcc','#6a9bcc','#788c5d','#788c5d','#7a7670','#7a7670'];
+  document.getElementById('inf-list').innerHTML=sorted.map((n,i)=>{
+    const m=metrics[n.id]||{};
+    const av=n.avatar?`<img src="${n.avatar}" onerror="this.parentElement.textContent='${(n.id[0]||'?').toUpperCase()}'">` :(n.id[0]||'?').toUpperCase();
+    const extra=n.subscribers?`· ${fmtNum(n.subscribers)}`:n.followers?`· ${fmtNum(n.followers)}`:'';
+    return `<div class="iitem" onclick="selectNodeById('${n.id}')">
+      <div class="irank">#${i+1}</div>
+      <div class="iavatar">${av}</div>
+      <div class="iinfo">
+        <div class="iname">${n.label||n.id}</div>
+        <div class="imeta">deg:${m.degree||0} · pr:${((m.pagerank||0)*100).toFixed(0)}% ${extra}</div>
+        <div class="ibar"><div class="ibarfill" style="width:${(m.normDeg||0)*100}%;background:${barC[i]}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const cmap={};
+  nodes.forEach(n=>{ const g=n.group||0; if(!cmap[g])cmap[g]=[]; cmap[g].push(n.label||n.id); });
+  document.getElementById('comm-list').innerHTML=Object.entries(cmap).map(([g,ms])=>`
+    <div class="citem">
+      <div class="cdot" style="background:${CC[g%CC.length]}"></div>
+      <div>
+        <div style="font-weight:600;font-size:11px;">Cluster ${+g+1}</div>
+        <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;">${ms.length} nodes · ${ms.slice(0,2).join(', ')}${ms.length>2?'…':''}</div>
+      </div>
+    </div>`).join('');
+
+  const opts=nodes.map(n=>`<option value="${n.id}">${n.label||n.id}</option>`).join('');
+  document.getElementById('path-from').innerHTML=opts;
+  document.getElementById('path-to').innerHTML=opts;
+  if(nodes.length>1)document.getElementById('path-to').selectedIndex=1;
+}
+
+
+function setLiveBadge(isLive,text,color){
+  const b=document.getElementById('live-badge');
+  document.getElementById('live-dot').style.background=color||'#788c5d';
+  document.getElementById('live-text').textContent=text;
+  b.style.display='flex';
+}
+
+function showLoad(title,sub,steps=[]){
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('ltxt').textContent=title.toUpperCase();
+  document.getElementById('lsub').textContent=sub;
+  const log=document.getElementById('llog');
+  log.innerHTML='';
+  if(steps.length){
+    steps.forEach((s,i)=>{
+      setTimeout(()=>{ log.innerHTML+=s+'<br>'; },i*350);
+    });
+  }
+}
+function updateLoad(sub){ document.getElementById('lsub').textContent=sub; }
+function hideLoad(){ document.getElementById('loading').classList.add('hidden'); }
+
+function showToast(msg,success=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=success?'#1a2d1a':'#2d1a1a';
+  t.style.borderColor=success?'rgba(120,140,93,0.5)':'rgba(217,119,87,0.4)';
+  t.style.color=success?'#788c5d':'#e8956d';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3800);
+}
+
+function clearGraph(){
+  graphData=null;metrics={};adjMap={};pathHL=[];removedNodes.clear();
+  d3.select('#graph-svg').selectAll('*').remove();
+  document.getElementById('empty-state').classList.remove('hidden');
+  document.getElementById('graph-legend').style.display='none';
+  document.getElementById('live-badge').style.display='none';
+  document.getElementById('node-detail-sec').style.display='none';
+  document.getElementById('comm-sec').style.display='none';
+  document.getElementById('algo-panel').classList.remove('show');
+  document.getElementById('inf-list').innerHTML='<div style="font-size:11px;color:var(--dim);font-family:\'Space Mono\',monospace;text-align:center;padding:18px 0;">Load a network first</div>';
+  ['s-nodes','s-edges','s-density','s-clusters'].forEach(id=>document.getElementById(id).textContent='—');
+}
+
+
+function showTip(event,d){
+  const m=metrics[d.id]||{};
+  const extra = d.subscribers
+    ? `<br><span style="color:var(--muted)">Subscribers: </span><b>${fmtNum(d.subscribers)}</b>`
+    : d.followers
+    ? `<br><span style="color:var(--muted)">Followers: </span><b>${fmtNum(d.followers)}</b>`
+    : '';
+  const views = d.views ? `<br><span style="color:var(--muted)">Views: </span><b>${fmtNum(d.views)}</b>` : '';
+  const vids  = d.videos ? `<br><span style="color:var(--muted)">Videos: </span><b>${d.videos}</b>` : '';
+  const t=document.getElementById('tooltip');
+  t.innerHTML=`<b style="color:var(--orange)">${d.label||d.id}</b><br><span style="color:var(--muted)">Connections: </span><b>${m.degree||0}</b><br><span style="color:var(--muted)">PageRank: </span><b>${((m.pagerank||0)*100).toFixed(1)}%</b>${extra}${views}${vids}`;
+  t.style.display='block';
+  t.style.left=(event.clientX+14)+'px';
+  t.style.top=(event.clientY-30)+'px';
+}
+
+function zoomIn(){ if(svg)svg.transition().call(zoomB.scaleBy,1.4); }
+function zoomOut(){ if(svg)svg.transition().call(zoomB.scaleBy,0.7); }
+function resetView(){ if(svg)svg.transition().call(zoomB.transform,d3.zoomIdentity); }
+function toggleSim(){
+  if(!sim)return;
+  simOn=!simOn;
+  if(simOn){sim.alphaTarget(0.3).restart();document.getElementById('sim-btn').textContent='⏸ Pause';}
+  else{sim.alphaTarget(0).stop();document.getElementById('sim-btn').textContent='▶ Resume';}
+}
+
+function fmtNum(n){
+  if(!n)return'0';
+  if(n>=1e9)return(n/1e9).toFixed(1)+'B';
+  if(n>=1e6)return(n/1e6).toFixed(1)+'M';
+  if(n>=1e3)return(n/1e3).toFixed(1)+'K';
+  return String(n);
+}
+
+
+window.onload=()=>{
+  renderPicks();
+  setTimeout(()=>loadPick('torvalds'),600);
+};
+window.onresize=()=>{ if(graphData)renderGraph(); };
+</script>
+</body>
+</html>
